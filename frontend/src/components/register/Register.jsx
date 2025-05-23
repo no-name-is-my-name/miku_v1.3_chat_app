@@ -36,7 +36,7 @@ const Register = () => {
     <div className='register'>
         <div className='register-item'>
             <h1>Create account</h1>
-            <form className='loginForm' onSubmit={handleRegister}>
+            <form className='loginForm'>
                 <input 
                   type='text' 
                   placeholder='Username' 
@@ -56,7 +56,7 @@ const Register = () => {
                 <input type='file' id='file' style={{display: 'none'}} onChange={handleChange} /> */}
                 {error && <p style={{ color: 'red' }}>{error}</p>}
                 <button className='loginButton' onClick={backtoLogin}>Sign in</button>
-                <button className='loginRegisterButton'>Register</button>
+                <button className='loginRegisterButton' onClick={handleRegister}>Register</button>
             </form>
         </div>
     </div>

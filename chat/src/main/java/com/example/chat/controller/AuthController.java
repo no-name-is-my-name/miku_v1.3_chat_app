@@ -32,4 +32,15 @@ public class AuthController {
         }
         return ResponseEntity.badRequest().body(null);
     }
+
+    @PostMapping("logout")
+    public ResponseEntity<String> logout(@RequestBody User user) {
+        User existingUser = userRepository.findByUsername(user.getUsername());
+        if (existingUser != null) {
+            existingUser.setOnlineStatus(false);
+            userRepository.save(existingUser);
+            return ResponseEntity.ok("Đăng ký thành công");
+        }
+        return ResponseEntity.badRequest().body(null);
+    }
 }

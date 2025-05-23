@@ -1,13 +1,16 @@
 import "./Detail.css"
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 const Detail = () => {
   const navigate = useNavigate();
   const username = sessionStorage.getItem("username");
   
-  const handleLogout = () => {
+  const handleLogout = async (e) => {
+    e.preventDefault();
     sessionStorage.removeItem("userId");
     sessionStorage.removeItem("username");
+    await axios.post("/api/auth/logout", {username});
     navigate("/login");
   };
 
