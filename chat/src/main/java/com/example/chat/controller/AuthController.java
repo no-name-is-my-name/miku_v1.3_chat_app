@@ -17,7 +17,7 @@ public class AuthController {
         if (userRepository.findByUsername(user.getUsername()) != null) {
             return ResponseEntity.badRequest().body("Username đã tồn tại");
         }
-        user.setOnlineStatus(false); // Mới đăng ký thì chưa online
+        user.setOnlineStatus(false);
         userRepository.save(user);
         return ResponseEntity.ok("Đăng ký thành công");
     }

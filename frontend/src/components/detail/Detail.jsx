@@ -15,7 +15,7 @@ const Detail = () => {
     <div className='detail'>
       <div className="user">
         <img src="./avatar.png" alt="" />
-        <h2>Jane Doe</h2>
+        <h2>{username}</h2>
         <p>Hello, its me Mario.</p>
       </div>
       <div className="info">

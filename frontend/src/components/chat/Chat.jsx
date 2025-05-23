@@ -62,9 +62,9 @@ const Chat = ({ selectedUser }) => {
     };
     fetchMessages();
 
-    const interval = setInterval(() => {
-      fetchMessages();
-    }, 1000);
+    // const interval = setInterval(() => {
+    //   fetchMessages();
+    // }, 1000);
 
     return () => clearInterval(interval);
   }, [selectedUser, userId]);

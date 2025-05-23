@@ -10,9 +10,6 @@ import org.springframework.web.socket.config.annotation.*;
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
-    @Autowired
-    private WebSocketAuthInterceptor authInterceptor;
-
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
@@ -24,10 +21,5 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         registry.enableSimpleBroker("/queue", "/topic");
         registry.setApplicationDestinationPrefixes("/app");
-    }
-
-    @Override
-    public void configureClientInboundChannel(ChannelRegistration registration) {
-        registration.interceptors(authInterceptor);
     }
 }
