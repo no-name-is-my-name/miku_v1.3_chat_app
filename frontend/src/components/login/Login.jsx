@@ -29,11 +29,6 @@ const Login = () => {
     navigate("/register");
   };
 
-  // const greetingLogin = e => {
-  //   e.preventDefault();
-  //   toast.warn("Hello world!");
-  // }
-
   return (
     <div className='login'>
         <div className='login-item'>

@@ -3,7 +3,7 @@ import { useRef, useState, useEffect } from "react";
 import EmojiPicker from "emoji-picker-react";
 import axios from "axios";
 import SockJS from "sockjs-client";
-import { Client } from "@stomp/stompjs";
+import {Stomp} from "@stomp/stompjs";
 
 const Chat = ({ selectedUser }) => {
   const [open, setOpen] = useState(false);
@@ -65,106 +65,70 @@ const Chat = ({ selectedUser }) => {
     // const interval = setInterval(() => {
     //   fetchMessages();
     // }, 1000);
-
-    return () => clearInterval(interval);
+    //return () => clearInterval(interval);
   }, [selectedUser, userId]);
 
   // Thiết lập WebSocket
   useEffect(() => {
-    if (!username || !userId) {
-      console.log("Không thiết lập WebSocket: username hoặc userId thiếu", { username, userId });
-      return;
-    }
-
-    console.log("Kết nối WebSocket cho username:", username, "userId:", userId);
-    const socket = new SockJS("/ws", null,{
-      headers: {
-        username: username,
-      },
+    if (!username || !userId) return;
+    const client = Stomp.over(() => new SockJS("/ws"));
+    client.connect({}, () => {
+      client.subscribe(`/user/${username}/queue/messages`, (message) => {
+        const receivedMessage = JSON.parse(message.body);
+        const formattedMessage = {
+          id: receivedMessage.id,
+          content: receivedMessage.content,
+          image: receivedMessage.content?.includes(".png") ? receivedMessage.content : null,
+          isOwn: receivedMessage.sender?.id === parseInt(userId),
+          sender: receivedMessage.sender,
+          receiver: receivedMessage.receiver,
+          createdAt: receivedMessage.createdAt,
+          timestamp: formatTimestamp(receivedMessage.createdAt),
+        };
+        setMessages((prevMessages) => {
+          if (prevMessages.some(msg => msg.id === formattedMessage.id)) return prevMessages;
+          return [...prevMessages, formattedMessage];
+        });
+      });
     });
-
-    const client = new Client({
-      webSocketFactory: () => socket,
-      reconnectDelay: 5000,
-      debug: (str) => {
-        console.log("WebSocket debug:", str);
-      },
-      onConnect: () => {
-        console.log("WebSocket đã kết nối");
-        console.log("Đăng ký subscription cho:", `/user/${username}/queue/messages`);
-        client.subscribe(`/user/${username}/queue/messages`, (msg) => {
-          console.log("Raw WebSocket message object:", msg);
-          console.log("Raw WebSocket message body:", msg.body);
-          try {
-            const message = JSON.parse(msg.body);
-            console.log("Nhận tin nhắn WebSocket parsed:", message);
-            console.log("selectedUser hiện tại:", selectedUser);
-            console.log("userId hiện tại:", userId);
-
-            // Kiểm tra dữ liệu tin nhắn
-            if (!message.id || !message.sender || !message.receiver || !message.content) {
-              console.log("Dữ liệu tin nhắn không đầy đủ:", message);
-              return;
-            }
-
-            setMessages((prev) => {
-              if (prev.some((m) => m.id === message.id)) {
-                console.log("Tin nhắn trùng lặp, bỏ qua:", message.id);
-                return prev;
-              }
-              const newMessages = [
-                ...prev,
-                {
-                  id: message.id,
-                  content: message.content,
-                  image: message.content.includes(".png") ? message.content : null,
-                  isOwn: message.sender.id === parseInt(userId),
-                  sender: message.sender,
-                  receiver: message.receiver,
-                  createdAt: message.createdAt || new Date().toISOString(),
-                  timestamp: formatTimestamp(message.createdAt || new Date().toISOString()),
-                },
-              ].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-              console.log("Cập nhật danh sách tin nhắn:", newMessages.map((m) => ({ id: m.id, content: m.content })));
-              return [...newMessages]; // Tạo mảng mới
-            });
-
-            console.log("Thông tin lọc tin nhắn:", {
-              senderId: message.sender.id,
-              receiverId: message.receiver.id,
-              userId: parseInt(userId),
-              selectedUserId: selectedUser?.id,
-              isValid:
-                selectedUser &&
-                ((message.sender.id === parseInt(userId) && message.receiver.id === selectedUser.id) ||
-                 (message.sender.id === selectedUser.id && message.receiver.id === parseInt(userId))),
-            });
-          } catch (err) {
-            console.error("Lỗi khi parse tin nhắn WebSocket:", err);
-          }
-        }, { id: `sub-${username}` });
-      },
-      onStompError: (frame) => {
-        console.error("Lỗi WebSocket:", frame);
-        console.error("Error message:", frame.headers?.message);
-        console.error("Error details:", frame.headers);
-        alert("Không thể kết nối WebSocket. Vui lòng thử lại.");
-      },
-      onWebSocketError: (error) => {
-        console.error("Lỗi kết nối WebSocket:", error);
-      },
-      onWebSocketClose: () => {
-        console.log("WebSocket đã đóng");
-      },
-    });
-    client.activate();
     setStompClient(client);
 
     return () => {
-      client.deactivate();
+      client.disconnect();
       console.log("WebSocket đã ngắt kết nối");
     };
-  }, [username, userId, selectedUser]);
+  }, [username, userId]);
+
+
+  // Gửi tin nhắn
+  const handleSendMessage = async (e) => {
+    e.preventDefault();
+    if (!text.trim() || !userId || !stompClient || !stompClient.connected) {
+      alert("Không thể gửi tin nhắn. Hãy kiểm tra kết nối và nhập nội dung.");
+      return;
+    }
+
+    if (!selectedUser || !selectedUser.id) {
+      alert("Vui lòng chọn người nhận.");
+      return;
+    }
+
+    const message = {
+      sender: { id: parseInt(userId), username },
+      receiver: { id: selectedUser.id, username: selectedUser.username },
+      content: text,
+    };
+
+    try {
+      console.log("Gửi tin nhắn qua WebSocket:", message);
+      stompClient.send("/app/send", {}, JSON.stringify(message));
+      setText("");
+    } catch (err) {
+      console.error("Lỗi khi gửi tin nhắn WebSocket:", err);
+      alert("Gửi tin nhắn thất bại: " + err.message);
+    }
+  };
+
 
   // Định dạng thời gian
   const formatTimestamp = (dateStr) => {
@@ -183,38 +147,6 @@ const Chat = ({ selectedUser }) => {
   const handleEmoji = (e) => {
     setText((prev) => prev + e.emoji);
     setOpen(false);
-  };
-
-  // Gửi tin nhắn
-  const handleSendMessage = async (e) => {
-    e.preventDefault();
-    if (!text.trim() || !userId) {
-      alert("Vui lòng đảm bảo đã đăng nhập và nhập nội dung tin nhắn.");
-      return;
-    }
-
-    if (!selectedUser || !selectedUser.id) {
-      alert("Vui lòng chọn người nhận.");
-      return;
-    }
-
-    const message = {
-      sender: { id: parseInt(userId), username: username },
-      receiver: { id: selectedUser.id, username: selectedUser.username },
-      content: text,
-    };
-
-    try {
-      console.log("Gửi tin nhắn:", message);
-      const response = await axios.post("/api/messages/send", message);
-      console.log("Phản hồi từ /api/messages/send:", response.data);
-      setText("");
-    } catch (err) {
-      console.error("Lỗi khi gửi tin nhắn:", err);
-      console.log("Mã trạng thái:", err.response?.status);
-      console.log("Phản hồi lỗi:", err.response?.data);
-      alert("Gửi tin nhắn thất bại: " + (err.response?.data || err.message));
-    }
   };
 
   // Log messages để debug render
