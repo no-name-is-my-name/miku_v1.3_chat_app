@@ -1,13 +1,16 @@
 import "./Detail.css"
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 const Detail = () => {
   const navigate = useNavigate();
   const username = sessionStorage.getItem("username");
   
-  const handleLogout = () => {
+  const handleLogout = async (e) => {
+    e.preventDefault();
     sessionStorage.removeItem("userId");
     sessionStorage.removeItem("username");
+    await axios.post("/api/auth/logout", {username});
     navigate("/login");
   };
 
@@ -15,7 +18,7 @@ const Detail = () => {
     <div className='detail'>
       <div className="user">
         <img src="./avatar.png" alt="" />
-        <h2>Jane Doe</h2>
+        <h2>{username}</h2>
         <p>Hello, its me Mario.</p>
       </div>
       <div className="info">

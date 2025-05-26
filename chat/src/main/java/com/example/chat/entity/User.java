@@ -12,6 +12,7 @@ public class User {
     @Column(unique = true)
     private String username;
     private String password;
+    private String avatarUrl;
     private boolean onlineStatus;
 
     // Getters và Setters
@@ -21,6 +22,8 @@ public class User {
     public void setUsername(String username) { this.username = username; }
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
+    public String getAvatarUrl() {return avatarUrl; }
+    public void setAvatarUrl(String avatarUrl) { this.avatarUrl = avatarUrl; }
     public boolean isOnlineStatus() { return onlineStatus; }
     public void setOnlineStatus(boolean onlineStatus) { this.onlineStatus = onlineStatus; }
 }

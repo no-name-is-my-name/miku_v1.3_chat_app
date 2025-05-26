@@ -29,16 +29,11 @@ const Login = () => {
     navigate("/register");
   };
 
-  // const greetingLogin = e => {
-  //   e.preventDefault();
-  //   toast.warn("Hello world!");
-  // }
-
   return (
     <div className='login'>
         <div className='login-item'>
             <h1>Welcome back</h1>
-            <form className='loginForm' onSubmit = {handleLogin}>
+            <form className='loginForm'>
                 <input 
                   type='text' 
                   placeholder='Username' 
@@ -54,7 +49,7 @@ const Login = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   required/>
                 {error && <p style={{ color: 'red' }}>{error}</p>}
-                <button className='loginButton'>Log in</button>
+                <button className='loginButton' onClick={handleLogin}>Log in</button>
                 <button className='loginRegisterButton' onClick={backtoRegister}>Register</button>
             </form>
         </div>
