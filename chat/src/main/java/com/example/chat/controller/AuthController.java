@@ -16,8 +16,8 @@ public class AuthController {
     @Autowired
     private UserRepository userRepository;
 
-    private static final String UPLOAD_DIR = "D:\\miku_chat_app v1.3\\miku_v1.3_chat_app\\chat\\src\\main\\resources\\static\\uploads";
-    //Đường dẫn lưu avater của người dùng
+    private static final String UPLOAD_DIR = "D:\\miku_chat_app v1.3\\miku_v1.3_chat_app\\chat\\src\\main\\resources\\static\\uploads\\";
+    //Đường dẫn lưu avatar của người dùng
 
     @PostMapping("/login")
     public ResponseEntity<User> login(@RequestBody User user) {

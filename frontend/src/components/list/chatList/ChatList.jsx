@@ -7,13 +7,14 @@ const ChatList = ({ onSelectUser }) => {
   const [addMode, setAddMode] = useState(false);
   const [users, setUsers] = useState([]);
   const username = sessionStorage.getItem("username");
+  const [avatarMap, setAvatarMap] = useState({});
 
   // Lấy danh sách tất cả người dùng
   useEffect(() => {
     const fetchUsers = async () => {
       try {
         const response = await axios.get("/api/users/all");
-        console.log("Danh sách người dùng:", response.data); // Debug
+        console.log("Danh sách người dùng:", response.data); 
         setUsers(response.data.filter((u) => u.username !== username));
       } catch (err) {
         console.error("Lỗi khi lấy danh sách người dùng:", err);
@@ -21,6 +22,27 @@ const ChatList = ({ onSelectUser }) => {
     };
     fetchUsers();
   }, [username]);
+
+  useEffect(() => {
+  const fetchAvatars = async () => {
+    const newAvatarMap = {};
+    await Promise.all(users.map(async (user) => {
+      try {
+        const res = await axios.get(`/api/users/avatar/${user.id}`, { responseType: "blob" });
+        if (res.status === 200 && res.data.size > 0) {
+          newAvatarMap[user.id] = URL.createObjectURL(res.data);
+        } else {
+          newAvatarMap[user.id] = "./avatar.png";
+        }
+      } catch {
+        newAvatarMap[user.id] = "./avatar.png";
+        }
+      }));
+    setAvatarMap(newAvatarMap);
+    };
+    if (users.length > 0) fetchAvatars();
+  }, [users]);
+
 
   const handleSelectUser = (user) => {
     console.log("Chọn người dùng:", user); // Debug
@@ -51,7 +73,7 @@ const ChatList = ({ onSelectUser }) => {
           className="item"
           onClick={() => handleSelectUser(user)}
         >
-          <img src="./avatar.png" alt="" />
+          <img src={avatarMap[user.id] || "./avatar.png"} alt="" />
           <div className="texts">
             <span>{user.username}</span>
             <p>Hey! How are you?</p>
