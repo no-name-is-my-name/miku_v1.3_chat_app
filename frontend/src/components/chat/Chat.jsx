@@ -13,6 +13,8 @@ const Chat = ({ selectedUser }) => {
   const username = sessionStorage.getItem("username");
   const userId = sessionStorage.getItem("userId");
   const [stompClient, setStompClient] = useState(null);
+  const [avatarUrl, setAvatarUrl] = useState("./avatar.png");
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     console.log("selectedUser thay đổi:", selectedUser);
@@ -24,6 +26,27 @@ const Chat = ({ selectedUser }) => {
       endRef.current.scrollIntoView({behavior: "auto"});
     }
   }, [messages]);
+
+  const fetchAvatar = async () => {
+    try {
+      const response = await axios.get(`/api/users/avatar/${selectedUser.id}`, {
+        responseType: "blob", // Nhận dữ liệu dưới dạng Blob
+      });
+      if (response.status === 200) {
+        setAvatarUrl(URL.createObjectURL(response.data));
+      } else {
+        setAvatarUrl("./avatar.png"); // Fallback nếu không tìm thấy
+      }
+    } catch (err) {
+      console.error("Lỗi khi lấy avatar:", err);
+      setError("Không thể tải ảnh avatar.");
+      setAvatarUrl("./avatar.png");
+    }
+  };
+
+  useEffect(() => {
+    if (selectedUser) fetchAvatar();
+  }, [selectedUser]);
 
   // Lấy lịch sử tin nhắn
   useEffect(() => {
@@ -62,10 +85,6 @@ const Chat = ({ selectedUser }) => {
     };
     fetchMessages();
 
-    // const interval = setInterval(() => {
-    //   fetchMessages();
-    // }, 1000);
-    //return () => clearInterval(interval);
   }, [selectedUser, userId]);
 
   // Thiết lập WebSocket
@@ -158,7 +177,7 @@ const Chat = ({ selectedUser }) => {
     <div className="chat">
       <div className="top">
         <div className="user">
-          <img src="./avatar.png" alt="" />
+          <img src={avatarUrl} alt="" />
           <div className="texts">
             <span>{selectedUser ? selectedUser.username : "Chọn người dùng"}</span>
             <p>{selectedUser ? "Active now" : ""}</p>

@@ -1,11 +1,35 @@
 import "./Detail.css"
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 
 const Detail = () => {
   const navigate = useNavigate();
   const username = sessionStorage.getItem("username");
+  const userId = sessionStorage.getItem("userId");
+  const [avatarUrl, setAvatarUrl] = useState("./avatar.png");
   
+  const fetchAvatar = async () => {
+    try {
+      const response = await axios.get(`/api/users/avatar/${userId}`, {
+        responseType: "blob", // Nhận dữ liệu dưới dạng Blob
+      });
+      if (response.status === 200) {
+        setAvatarUrl(URL.createObjectURL(response.data));
+      } else {
+        setAvatarUrl("./avatar.png"); // Fallback nếu không tìm thấy
+      }
+    } catch (err) {
+      console.error("Lỗi khi lấy avatar:", err);
+      setError("Không thể tải ảnh avatar.");
+      setAvatarUrl("./avatar.png");
+    }
+  };
+
+  useEffect(() => {
+      if (userId) fetchAvatar();
+    }, [userId]);
+
   const handleLogout = async (e) => {
     e.preventDefault();
     sessionStorage.removeItem("userId");
@@ -17,7 +41,7 @@ const Detail = () => {
   return (
     <div className='detail'>
       <div className="user">
-        <img src="./avatar.png" alt="" />
+        <img src = {avatarUrl} alt="" />
         <h2>{username}</h2>
         <p>Hello, its me Mario.</p>
       </div>

@@ -1,5 +1,5 @@
 import ChatList from "./chatList/ChatList"
-import Userinfo from "./userinfo/Userinfo"
+import Userinfo from "./userInfo/Userinfo"
 import "./List.css"
 
 const List = ({ onSelectUser }) => {

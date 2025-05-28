@@ -1,0 +1,159 @@
+.changeinfo {
+    width: 256px;
+    height: 256px;
+    padding: 30px;
+    background-color: rgba(17, 25, 40, 0.8);
+    border-radius: 10px;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+
+    form{
+        display: flex;
+        gap: 20px;
+
+        input{
+            padding: 20px;
+            border-radius: 10px;
+            border: none;
+            outline: none;
+        }
+
+        button{
+            padding: 20px;
+            border-radius: 10px;
+            border: none;
+            background-color: #1a73e8;
+            color: white;
+            cursor: pointer;
+        }
+    }
+
+    .userInfo{
+        margin-top: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        .detail{
+            display: flex;
+            align-items: center;
+            gap: 20px;
+
+            img{
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+                object-fit: cover;
+            }
+        }
+
+        button{
+            padding: 10px;
+            border-radius: 10px;
+            border: none;
+            background-color: #1a73e8;
+            color: white;
+            cursor: pointer;
+        }
+    }
+}
+
+.changeModeOverlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.changeMode {
+  background: #fff;
+  padding: 20px 22px 18px 22px;   /* giáº£m padding */
+  border-radius: 14px;
+  box-shadow: 0 8px 32px rgba(44,62,80,0.18);
+  min-width: 260px;               /* giáº£m chiá»u rá»™ng tá»‘i thiá»ƒu */
+  max-width: 90vw;
+  position: relative;
+}
+
+.changeinfo-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;                      /* giáº£m khoáº£ng cÃ¡ch giá»¯a avatar vÃ  info */
+  margin-bottom: 12px;
+}
+.changeinfo-avatar {
+  width: 72px !important;
+  height: 72px !important;
+  min-width: 72px !important;
+  min-height: 72px !important;
+  max-width: 72px !important;
+  max-height: 72px !important;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2.5px solid #2f80ed;
+  box-shadow: 0 2px 8px rgba(44,62,80,0.08);
+  display: block;
+}
+.changeinfo-user {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.changeinfo-name {
+  font-weight: 700;
+  font-size: 0.98rem;
+  color: #222;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 7px;
+  padding: 3px 7px;               /* giáº£m padding input */
+  outline: none;
+  transition: border 0.2s;
+  width: 170px;                   /* giáº£m chiá»u rá»™ng input */
+}
+.changeinfo-name:focus {
+  border: 1.5px solid #2f80ed;
+}
+.changeinfo-id {
+  color: #888;
+  font-size: 0.98rem;
+}
+.changeinfo-actions {
+  display: flex;
+  gap: 18px;
+  justify-content: center;
+  margin-top: 18px;
+}
+.change-btn {
+  padding: 5px 14px;
+  border: none;
+  border-radius: 7px;
+  background: #5786c4;
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.change-btn:hover {
+  background: #0d4c9e;
+}
+.changeinfo-close {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  background: transparent;
+  border: none;
+  font-size: 2rem;
+  color: #aaa;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.changeinfo-close:hover {
+  color: #2f80ed;
+}
