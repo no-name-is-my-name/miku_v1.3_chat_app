@@ -48,19 +48,19 @@ const Detail = () => {
       <div className="info">
         <div className="option">
           <div className="title">
-            <span>Chat Setting</span>
+            <span>Cài đặt</span>
             <img src="./arrowUp.png" alt="" />
           </div>
         </div>
         <div className="option">
           <div className="title">
-            <span>Privacy & help</span>
+            <span>Riêng tư và trợ giúp</span>
             <img src="./arrowUp.png" alt="" />
           </div>
         </div>
         <div className="option">
           <div className="title">
-            <span>Shared Photo</span>
+            <span>Ảnh</span>
             <img src="./arrowDown.png" alt="" />
           </div>
           <div className="photo">
@@ -82,12 +82,12 @@ const Detail = () => {
         </div>
         <div className="option">
           <div className="title">
-            <span>Shared Files</span>
+            <span>File</span>
             <img src="./arrowUp.png" alt="" />
           </div>
         </div>
-        <button>Block User</button>
-        <button className="logout" onClick={handleLogout}>Log Out</button>
+        <button>Chặn người dùng</button>
+        <button className="logout" onClick={handleLogout}>Đăng xuất</button>
       </div>
     </div>
   )

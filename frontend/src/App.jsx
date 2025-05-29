@@ -9,9 +9,15 @@ import { useState } from "react";
 
 const App = () => {
   const [selectedUser, setSelectedUser] = useState(null);
+  const [showDetail, setShowDetail] = useState(false);
+
   const handleSelectUser = (user) => {
     console.log("App: Chọn người dùng:", user); // Debug
     setSelectedUser(user);
+  };
+
+  const toggleDetail = () => {
+    setShowDetail((prev) => !prev);
   };
 
   return (
@@ -24,8 +30,8 @@ const App = () => {
           path="/chat"
           element={<div className="container" style={{ display: "flex" }}>
             <List onSelectUser={handleSelectUser} />
-            <Chat selectedUser={selectedUser} />
-            <Detail selectedUser={selectedUser} />
+            <Chat selectedUser={selectedUser} onToggleDetail = {toggleDetail}/>
+            {showDetail && <Detail selectedUser={selectedUser} />}
           </div>}
         />
         <Route path="/register" element={<Register />} />

@@ -7,22 +7,94 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
-@RestController
+@Controller
 @RequestMapping("/api/users")
 public class UserController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
+
     private static final String UPLOAD_DIR = "D:\\miku_chat_app v1.3\\miku_v1.3_chat_app\\chat\\src\\main\\resources\\static\\uploads\\";
+    private static final int MAX_FRIENDS = 10;
+
+    @PostMapping("/add-friend")
+    public ResponseEntity<Map<String, Object>> addFriend(
+            @RequestParam Long userId,
+            @RequestParam Long friendId) {
+        try {
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new IllegalArgumentException("User không tồn tại với ID: " + userId));
+            User friend = userRepository.findById(friendId)
+                    .orElseThrow(() -> new IllegalArgumentException("Friend không tồn tại với ID: " + friendId));
+
+            // Kiểm tra nếu đã là bạn bè
+            if (user.getFriendIds().contains(friendId)) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Đã là bạn bè"));
+            }
+
+            // Kiểm tra giới hạn số lượng bạn bè
+            if (user.getFriendIds().size() >= MAX_FRIENDS) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Đã đạt giới hạn 10 bạn bè"));
+            }
+
+            // Thêm bạn bè (hai chiều)
+            user.getFriendIds().add(friendId);
+            userRepository.save(user);
+
+            friend.getFriendIds().add(userId);
+            userRepository.save(friend);
+
+            // Cập nhật danh sách bạn bè qua WebSocket
+            messagingTemplate.convertAndSend("/topic/friends/" + userId, getFriendsList(userId));
+            messagingTemplate.convertAndSend("/topic/friends/" + friendId, getFriendsList(friendId));
+
+            return ResponseEntity.ok(Map.of("message", "Thêm bạn bè thành công"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Lỗi khi thêm bạn bè: " + e.getMessage()));
+        }
+    }
+
+    // Lấy danh sách bạn bè
+    @GetMapping("/friends/{userId}")
+    public ResponseEntity<List<Map<String, Object>>> getFriends(@PathVariable Long userId) {
+        try {
+            List<Map<String, Object>> friendsList = getFriendsList(userId);
+            return ResponseEntity.ok(friendsList);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+    private List<Map<String, Object>> getFriendsList(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User không tồn tại với ID: " + userId));
+        List<Long> friendIds = user.getFriendIds();
+        return friendIds.stream()
+                .map(friendId -> userRepository.findById(friendId).orElse(null))
+                .filter(Objects::nonNull)
+                .map(friend -> {
+                    Map<String, Object> friendData = new HashMap<>();
+                    friendData.put("id", friend.getId());
+                    friendData.put("username", friend.getUsername());
+                    friendData.put("onlineStatus", friend.isOnlineStatus());
+                    friendData.put("avatarUrl", friend.getAvatarUrl());
+                    return friendData;
+                })
+                .collect(Collectors.toList());
+    }
 
     @GetMapping("/online")
     public ResponseEntity<List<User>> getOnlineUsers() {

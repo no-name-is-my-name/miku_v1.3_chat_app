@@ -2,52 +2,67 @@ import AddUser from "./addUser/AddUser";
 import "./ChatList.css";
 import { useState, useEffect } from "react";
 import axios from "axios";
+import SockJS from "sockjs-client";
+import { Stomp } from "@stomp/stompjs";
 
 const ChatList = ({ onSelectUser }) => {
   const [addMode, setAddMode] = useState(false);
-  const [users, setUsers] = useState([]);
-  const username = sessionStorage.getItem("username");
-  const [avatarMap, setAvatarMap] = useState({});
+  const [friends, setFriends] = useState([]);
+  const userId = sessionStorage.getItem("userId");
 
   // Lấy danh sách tất cả người dùng
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await axios.get("/api/users/all");
-        console.log("Danh sách người dùng:", response.data); 
-        setUsers(response.data.filter((u) => u.username !== username));
-      } catch (err) {
-        console.error("Lỗi khi lấy danh sách người dùng:", err);
-      }
-    };
-    fetchUsers();
-  }, [username]);
+  const fetchFriends = async () => {
+        try {
+            const response = await axios.get(`/api/users/friends/${userId}`);
+            const friendsData = response.data.map((friend) => ({
+                ...friend,
+                avatarUrl: null,
+            }));
 
-  useEffect(() => {
-  const fetchAvatars = async () => {
-    const newAvatarMap = {};
-    await Promise.all(users.map(async (user) => {
-      try {
-        const res = await axios.get(`/api/users/avatar/${user.id}`, { responseType: "blob" });
-        if (res.status === 200 && res.data.size > 0) {
-          newAvatarMap[user.id] = URL.createObjectURL(res.data);
-        } else {
-          newAvatarMap[user.id] = "./avatar.png";
+            // Lấy avatar cho từng bạn bè
+            for (let friend of friendsData) {
+                try {
+                    const avatarResponse = await axios.get(`/api/users/avatar/${friend.id}`, {
+                        responseType: "blob",
+                    });
+                    friend.avatarUrl = URL.createObjectURL(avatarResponse.data);
+                } catch (err) {
+                    friend.avatarUrl = "./avatar.png";
+                }
+            }
+
+            setFriends(friendsData);
+        } catch (err) {
+            console.error("Lỗi khi lấy danh sách bạn bè:", err);
         }
-      } catch {
-        newAvatarMap[user.id] = "./avatar.png";
-        }
-      }));
-    setAvatarMap(newAvatarMap);
     };
-    if (users.length > 0) fetchAvatars();
-  }, [users]);
 
+  useEffect(() => {
+        fetchFriends();
 
-  const handleSelectUser = (user) => {
-    console.log("Chọn người dùng:", user); // Debug
+        const client = Stomp.over(() => new SockJS("/ws"));
+        client.connect({}, () => {
+            client.subscribe(`/topic/friends/${userId}`, (message) => {
+                const updatedFriends = JSON.parse(message.body);
+                setFriends((prevFriends) =>
+                    updatedFriends.map((friend) => {
+                        const existingFriend = prevFriends.find((f) => f.id === friend.id);
+                        return {
+                            ...friend,
+                            avatarUrl: existingFriend ? existingFriend.avatarUrl : "./avatar.png",
+                        };
+                    })
+                );
+            });
+        });
+
+        return () => client.deactivate();
+    }, [userId]);
+
+  const handleSelectUser = (friend) => {
+    console.log("Chọn người dùng:", friend); // Debug
     if (typeof onSelectUser === "function") {
-      onSelectUser(user);
+      onSelectUser(friend);
     } else {
       console.error("onSelectUser không phải là hàm");
     }
@@ -58,7 +73,7 @@ const ChatList = ({ onSelectUser }) => {
       <div className="search">
         <div className="searchBar">
           <img src="./search.png" alt="" />
-          <input type="text" placeholder="Search" name="search" />
+          <input type="text" placeholder="Tìm kiếm" name="search" />
         </div>
         <img
           src={addMode ? "./minus.png" : "./p1.png"}
@@ -67,20 +82,23 @@ const ChatList = ({ onSelectUser }) => {
           onClick={() => setAddMode((prev) => !prev)}
         />
       </div>
-      {users.map((user) => (
+      {friends.map((friend) => (
         <div
-          key={user.id}
+          key={friend.id}
           className="item"
-          onClick={() => handleSelectUser(user)}
+          onClick={() => handleSelectUser(friend)}
         >
-          <img src={avatarMap[user.id] || "./avatar.png"} alt="" />
+          <img 
+            src={friend.avatarUrl || "./avatar.png"}
+            alt={friend.username}
+            onError={(e) => (e.target.src = "./avatar.png")} />
           <div className="texts">
-            <span>{user.username}</span>
-            <p>Hey! How are you?</p>
+            <span>{friend.username}</span>
+            <p>{friend.onlineStatus ? "Trực tuyến" : "Ngoại tuyến"}</p>
           </div>
         </div>
       ))}
-      {addMode && <AddUser />}
+      {addMode && <AddUser onFriendAdded={fetchFriends}/>}
     </div>
   );
 };

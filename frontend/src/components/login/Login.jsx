@@ -32,25 +32,25 @@ const Login = () => {
   return (
     <div className='login'>
         <div className='login-item'>
-            <h1>Welcome back</h1>
+            <h1>Chào mừng trở lại</h1>
             <form className='loginForm'>
                 <input 
                   type='text' 
-                  placeholder='Username' 
+                  placeholder='Tên tài khoản' 
                   name='username' 
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   required/>
                 <input 
                   type='password' 
-                  placeholder='Password' 
+                  placeholder='Mật khẩu'
                   name='password' 
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required/>
                 {error && <p style={{ color: 'red' }}>{error}</p>}
-                <button className='loginButton' onClick={handleLogin}>Log in</button>
-                <button className='loginRegisterButton' onClick={backtoRegister}>Register</button>
+                <button className='loginButton' onClick={handleLogin}>Đăng nhập</button>
+                <button className='loginRegisterButton' onClick={backtoRegister}>Đăng kí</button>
             </form>
         </div>
         <div className=''></div>

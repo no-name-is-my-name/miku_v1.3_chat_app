@@ -64,28 +64,28 @@ const Register = () => {
   return (
     <div className='register'>
         <div className='register-item'>
-            <h1>Create account</h1>
+            <h1>Tạo tài khoản</h1>
             <form className='loginForm'>
                 <input 
                   type='text' 
-                  placeholder='Username' 
+                  placeholder='Tên tài khoản' 
                   name='username'
                   value={username} 
                   onChange={(e) => setUsername(e.target.value)}
                   required/>
                 <input 
                   type='password' 
-                  placeholder='Password' 
+                  placeholder='Mật khẩu' 
                   name='password' 
                   onChange={(e) => setPassword(e.target.value)}
                   required/>
                 <label htmlFor='file'>
                   <img src={avatar.url || "./avatar.png"} alt=""/>
-                  Upload an image</label>
+                  Tải ảnh lên</label>
                 <input type='file' id='file' style={{display: 'none'}} onChange={handleChange} /> 
                 {error && <p style={{ color: 'red' }}>{error}</p>}
-                <button className='loginButton' onClick={backtoLogin}>Sign in</button>
-                <button className='loginRegisterButton' onClick={handleRegister}>Register</button>
+                <button className='loginButton' onClick={backtoLogin}>Đăng nhập</button>
+                <button className='loginRegisterButton' onClick={handleRegister}>Đăng kí</button>
             </form>
         </div>
     </div>
