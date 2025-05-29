@@ -5,7 +5,7 @@ import axios from "axios";
 import SockJS from "sockjs-client";
 import {Stomp} from "@stomp/stompjs";
 
-const Chat = ({ selectedUser }) => {
+const Chat = ({ selectedUser, onToggleDetail }) => {
   const [open, setOpen] = useState(false);
   const [text, setText] = useState("");
   const [messages, setMessages] = useState([]);
@@ -180,13 +180,17 @@ const Chat = ({ selectedUser }) => {
           <img src={avatarUrl} alt="" />
           <div className="texts">
             <span>{selectedUser ? selectedUser.username : "Chọn người dùng"}</span>
-            <p>{selectedUser ? "Active now" : ""}</p>
+            <p>{selectedUser ? selectedUser.onlineStatus ? "Trực tuyến" : "Ngoại tuyến" : "Ngoại tuyến"}</p>
           </div>
         </div>
         <div className="icons">
           <img src="./phone.png" alt="" />
           <img src="./video.png" alt="" />
-          <img src="./info.png" alt="" />
+          <img 
+            src="./info.png" 
+            alt=""
+            onClick={onToggleDetail} 
+          />
         </div>
       </div>
       <div className="center">
@@ -194,7 +198,7 @@ const Chat = ({ selectedUser }) => {
           messages.length > 0 ? (
             messages.map((msg) => (
               <div key={msg.id} className={`message ${msg.isOwn ? "own" : ""}`}>
-                {!msg.isOwn && <img src="./avatar.png" alt="" />}
+                {/* {!msg.isOwn && <img src="./avatar.png" alt="" />} */}
                 <div className="texts">
                   {msg.image ? (
                     <img src={msg.image} alt="" />
@@ -222,7 +226,7 @@ const Chat = ({ selectedUser }) => {
         <form onSubmit={handleSendMessage}>
           <input
             type="text"
-            placeholder="Type a message..."
+            placeholder="Nhập tin nhắn..."
             value={text}
             name="message"
             onChange={(e) => setText(e.target.value)}
@@ -239,7 +243,7 @@ const Chat = ({ selectedUser }) => {
             </div>
           </div>
           <button type="submit" className="sendButton" disabled={!selectedUser}>
-            Send
+            Gửi
           </button>
         </form>
       </div>

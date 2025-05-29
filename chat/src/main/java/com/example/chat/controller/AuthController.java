@@ -70,6 +70,19 @@ public class AuthController {
                 avatarUrl = "/uploads/" + fileName;
                 user.setAvatarUrl(avatarUrl);
             }
+            else {
+                String fileName = "avatar.png";
+                String uploadPath = UPLOAD_DIR + fileName;
+
+                java.io.File directory = new java.io.File(UPLOAD_DIR);
+                if (!directory.exists()) {
+                    directory.mkdirs();
+                }
+
+                avatar.transferTo(new java.io.File(uploadPath));
+                avatarUrl = "/uploads/" + fileName;
+                user.setAvatarUrl(avatarUrl);
+            }
 
             User savedUser = userRepository.save(user);
             return ResponseEntity.ok("Đăng ký thành công");

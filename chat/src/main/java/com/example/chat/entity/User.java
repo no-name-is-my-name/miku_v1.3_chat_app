@@ -1,6 +1,8 @@
 package com.example.chat.entity;
 
 import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -14,6 +16,10 @@ public class User {
     private String password;
     private String avatarUrl;
     private boolean onlineStatus;
+    @ElementCollection
+    @CollectionTable(name = "user_friends", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "friend_id")
+    private List<Long> friendIds = new ArrayList<>();
 
     // Getters và Setters
     public Long getId() { return id; }
@@ -26,4 +32,6 @@ public class User {
     public void setAvatarUrl(String avatarUrl) { this.avatarUrl = avatarUrl; }
     public boolean isOnlineStatus() { return onlineStatus; }
     public void setOnlineStatus(boolean onlineStatus) { this.onlineStatus = onlineStatus; }
+    public List<Long> getFriendIds() { return friendIds; }
+    public void setFriendIds(List<Long> friendIds) { this.friendIds = friendIds; }
 }
